@@ -3,7 +3,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      project = "ecs-deploy-example"
+      project = var.project
     }
   }
 }
