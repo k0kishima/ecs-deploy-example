@@ -40,8 +40,9 @@ resource "aws_ecs_service" "this" {
   desired_count   = 1
   launch_type     = "FARGATE"
   network_configuration {
-    subnets         = [aws_subnet.public.id]
-    security_groups = [aws_security_group.alb_sg.id]
+    subnets          = [aws_subnet.public.id]
+    security_groups  = [aws_security_group.fargate_sg.id]
+    assign_public_ip = true
   }
   load_balancer {
     target_group_arn = aws_lb_target_group.this.arn
@@ -51,5 +52,29 @@ resource "aws_ecs_service" "this" {
 
   tags = {
     Name = "${var.project}-service"
+  }
+}
+
+resource "aws_security_group" "fargate_sg" {
+  name        = "${var.project}-fargate-sg"
+  description = "Security group for Fargate tasks"
+  vpc_id      = aws_vpc.this.id
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project}-fargate-sg"
   }
 }
