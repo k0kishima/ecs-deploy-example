@@ -51,7 +51,7 @@ jobs:
 
       - name: Register ECS task definition
         run: |
-          aws ecs register-task-definition --family ${{ secrets.TASK_FAMILY }} --execution-role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ecs-deploy-example-ecs-task-execution-role --network-mode awsvpc --requires-compatibilities FARGATE --cpu 256 --memory 512 --container-definitions file://taskdef.json
+          aws ecs register-task-definition --family ${{ secrets.TASK_FAMILY }} --execution-role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ecs-deploy-example-ecs-task-execution-role --cli-input-json file://taskdef.json
 
       - name: Update ECS service
         run: |
