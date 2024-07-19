@@ -38,7 +38,8 @@ jobs:
         id: build-image
         uses: docker/build-push-action@v4
         with:
-          context: ./app/deploy
+          context: ./app
+          file: ./app/deploy/Dockerfile
           push: true
           tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
 
