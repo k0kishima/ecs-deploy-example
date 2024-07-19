@@ -45,9 +45,9 @@ jobs:
 
       - name: Render task definition from template
         id: render-task-def
-        run: |
-          IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest"
-          envsubst < app/deploy/taskdef-template.json > taskdef.json
+        run: envsubst < app/deploy/taskdef-template.json > taskdef.json
+        env:
+          IMAGE_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
 
       - name: Register ECS task definition
         run: |
