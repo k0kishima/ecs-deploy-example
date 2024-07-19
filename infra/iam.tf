@@ -17,7 +17,9 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy_attachment" {
+  depends_on = [aws_iam_role.ecs_task_execution_role]
+
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
@@ -53,9 +55,8 @@ resource "aws_iam_role" "github_actions_role" {
   }
 }
 
-resource "aws_iam_role_policy" "github_actions_ecr_policy" {
+resource "aws_iam_policy" "github_actions_ecr_policy" {
   name = "${var.project}-ecr-policy"
-  role = aws_iam_role.github_actions_role.id
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -68,10 +69,18 @@ resource "aws_iam_role_policy" "github_actions_ecr_policy" {
           "ecr:PutImage",
           "ecr:InitiateLayerUpload",
           "ecr:UploadLayerPart",
-          "ecr:CompleteLayerUpload"
+          "ecr:CompleteLayerUpload",
+          "ecr:GetAuthorizationToken"
         ],
         Resource = "*"
       }
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_ecr_policy_attachment" {
+  depends_on = [aws_iam_policy.github_actions_ecr_policy]
+
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = aws_iam_policy.github_actions_ecr_policy.arn
 }
