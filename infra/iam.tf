@@ -72,6 +72,7 @@ resource "aws_iam_policy" "github_actions_ecr_policy" {
           "ecr:CompleteLayerUpload",
           "ecr:GetAuthorizationToken",
           "ecs:RegisterTaskDefinition",
+          "ecs:UpdateService",
           "iam:PassRole"
         ],
         Resource = "*"
