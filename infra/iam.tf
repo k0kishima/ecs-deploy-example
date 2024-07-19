@@ -22,23 +22,30 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_iam_openid_connect_provider" "github_actions" {
+  url             = "https://token.actions.githubusercontent.com"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["9e99a48a9960b14926bb7f3b4bdf8ce051d08455"]
+}
+
 resource "aws_iam_role" "github_actions_role" {
   name = "${var.project}-github-actions-role"
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = {
-        Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
-      },
-      Action = "sts:AssumeRoleWithWebIdentity",
-      Condition = {
-        StringEquals = {
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:ref:refs/heads/main"
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.github_actions.arn
+        },
+        Action = "sts:AssumeRoleWithWebIdentity",
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:ref:refs/heads/main"
+          }
         }
       }
-    }]
+    ]
   })
 
   tags = {
@@ -47,8 +54,8 @@ resource "aws_iam_role" "github_actions_role" {
 }
 
 resource "aws_iam_role_policy" "github_actions_ecr_policy" {
+  name = "${var.project}-ecr-policy"
   role = aws_iam_role.github_actions_role.id
-
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
