@@ -1,10 +1,13 @@
 {
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
   "containerDefinitions": [
     {
       "name": "web",
       "image": "${IMAGE_URI}",
       "essential": true,
-      "memory": 512,
       "portMappings": [
         {
           "containerPort": 80,
