@@ -41,20 +41,20 @@ jobs:
           context: ./app
           file: ./app/deploy/Dockerfile
           push: true
-          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/ecs-deploy-example-ecr-repo:latest
 
       - name: Render task definition from template
         id: render-task-def
         run: envsubst < app/deploy/taskdef-template.json > taskdef.json
         env:
-          IMAGE_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+          IMAGE_URI: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/ecs-deploy-example-ecr-repo:latest
 
       - name: Register ECS task definition
         id: register-task-def
         run: |
-          TASK_DEF_ARN=$(aws ecs register-task-definition --family ${{ secrets.TASK_FAMILY }} --execution-role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ecs-deploy-example-ecs-task-execution-role --cli-input-json file://taskdef.json --query 'taskDefinition.taskDefinitionArn' --output text)
+          TASK_DEF_ARN=$(aws ecs register-task-definition --family ecs-deploy-example-task --execution-role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ecs-deploy-example-ecs-task-execution-role --cli-input-json file://taskdef.json --query 'taskDefinition.taskDefinitionArn' --output text)
           echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
 
       - name: Update ECS service
         run: |
-          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service ${{ secrets.ECS_SERVICE_NAME }} --task-definition ${{ env.TASK_DEF_ARN }} --force-new-deployment
+          aws ecs update-service --cluster ecs-deploy-example-ecs-cluster --service ecs-deploy-example-service --task-definition ${{ env.TASK_DEF_ARN }} --force-new-deployment
