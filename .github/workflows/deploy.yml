@@ -1,9 +1,12 @@
 name: Deploy to ECS
 
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
